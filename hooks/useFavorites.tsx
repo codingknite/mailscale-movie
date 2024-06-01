@@ -9,7 +9,6 @@ const useFavorites = () => {
     );
   } catch (error) {
     initialFavorites = [];
-    console.error('Failed to parse favorite movies');
   }
 
   const [favorites, setFavorites] = useState(initialFavorites);

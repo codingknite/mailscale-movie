@@ -1,18 +1,20 @@
 import SearchPage from '@/components/pages/Search/Search';
-import { MoviesApiResponse } from '@/types/movie';
+import { HandleError } from '@/lib/exception';
+import { ApiResponse } from '@/types/movie';
 
 const Search = async () => {
-  const apiKey = process.env.TMDB_API_KEY;
-
   const fetchRecommendations = await fetch(
-    `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&language=en-US&sort_by=popularity.desc&with_genres=878`
+    process.env.URL + '/api/get-recommendations'
   );
 
-  if (fetchRecommendations.ok) {
-    const recommendations: MoviesApiResponse =
-      await fetchRecommendations.json();
+  const response: ApiResponse = await fetchRecommendations.json();
 
-    return <SearchPage data={recommendations.results} />;
+  if (response.message === 'success') {
+    const { data } = response;
+
+    return <SearchPage data={data.movies.results} />;
+  } else {
+    throw new HandleError();
   }
 };
 

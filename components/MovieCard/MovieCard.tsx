@@ -11,7 +11,7 @@ const MovieCard = ({ data }: Props) => {
   return (
     <Link
       href={`/movie/${data.id}`}
-      className='w-[48%] mb-3 md:w-[32%] lg:w-[23%] xl:w-[19%]'
+      className='w-[48%] mb-3 md:w-[32%] lg:w-[23%] xl:w-[19%] transition-all ease-in-out duration-500 hover:scale-[1.025]'
     >
       <div
         className='h-[250px] w-full md:h-[275px]'

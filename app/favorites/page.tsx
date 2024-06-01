@@ -1,41 +1,37 @@
-// todo: handle movie has no image
-
 'use client';
 
+import Link from 'next/link';
 import FadeHero from '@/components/FadeHero';
 import MovieCard from '@/components/MovieCard';
-import React from 'react';
 import useFavorites from '@/hooks/useFavorites';
 import { useQuery } from '@tanstack/react-query';
-import { baseApiURL, baseImageURL } from '@/utils/helpers';
+import { baseImageURL } from '@/utils/helpers';
 import { MovieProps } from '@/types/movie';
-import Link from 'next/link';
+import { HandleError } from '@/lib/exception';
 
 const Favorites = () => {
-  const apiKey = process.env.NEXT_PUBLIC_TMDB_API_KEY;
   const { favorites } = useFavorites();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['fetch all favorites', favorites],
     queryFn: async () => {
       try {
-        const promises = favorites.map(async (fav) => {
-          const res = await fetch(
-            `${baseApiURL}/${fav}?api_key=${apiKey}&language=en-US&append_to_response=videos`
-          );
-
-          if (res.ok) {
-            return await res.json();
-          } else {
-            throw new Error(`An Error Occured. Error: ${res}`);
-          }
+        const fetchFavorites = await fetch('/api/get-favorites', {
+          method: 'POST',
+          body: JSON.stringify({
+            favorites,
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
         });
 
-        const data = await Promise.all(promises);
+        const response = await fetchFavorites.json();
+        const { data } = response;
 
         return data;
       } catch (error) {
-        console.error('Error fetching favorites');
+        throw new Error('Error fetching favorites');
       }
     },
     refetchOnMount: true,
@@ -50,11 +46,7 @@ const Favorites = () => {
   }
 
   if (error) {
-    return (
-      <div>
-        <p>Error fetching favorites</p>
-      </div>
-    );
+    throw new HandleError();
   }
 
   const randomFeature = Math.floor(Math.random() * favorites.length);
@@ -64,9 +56,13 @@ const Favorites = () => {
     <main className='text-white'>
       <div className=''>
         <FadeHero
-          imagePath={`${baseImageURL}/${
-            featuredMovie && featuredMovie.backdrop_path
-          }`}
+          imagePath={`${
+            featuredMovie.backdrop_path
+              ? '/search-poster-2.jpeg'
+              : `${baseImageURL}/${
+                  featuredMovie && featuredMovie.backdrop_path
+                }`
+          } `}
         >
           <div className='p-6 lg:ml-[5rem]'>
             <h1 className='text-5xl w-[70%] font-medium md:w-[50%] md:text-6xl'>

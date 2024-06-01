@@ -2,18 +2,36 @@
 
 import FadeHero from '@/components/FadeHero';
 import MovieCard from '@/components/MovieCard';
-import { MovieProps, MoviesApiResponse } from '@/types/movie';
-import { baseApiURL } from '@/utils/helpers';
 import { useQuery } from '@tanstack/react-query';
-import { ChangeEvent, FormEvent, useState } from 'react';
+import { ApiResponse, MovieProps } from '@/types/movie';
+import { useRouter, useSearchParams } from 'next/navigation';
+import {
+  ChangeEvent,
+  FormEvent,
+  KeyboardEvent,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
+import { HandleError } from '@/lib/exception';
 
 interface Props {
   data: MovieProps[];
 }
 
 const SearchPage = ({ data }: Props) => {
-  const apiKey = process.env.NEXT_PUBLIC_TMDB_API_KEY;
-  const [userInput, setUserInput] = useState('');
+  const router = useRouter();
+  const inputRef = useRef<HTMLInputElement>(null);
+  const params = useSearchParams();
+  const queryParam = params.get('query');
+
+  const [userInput, setUserInput] = useState(queryParam || '');
+
+  useEffect(() => {
+    if (inputRef.current && !userInput) {
+      inputRef.current.focus();
+    }
+  }, []);
 
   const {
     data: searchResults,
@@ -22,17 +40,24 @@ const SearchPage = ({ data }: Props) => {
   } = useQuery({
     queryKey: ['search results', userInput],
     queryFn: async () => {
-      const fetchSearchResults = await fetch(
-        `https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&language=en-US&page=1&query=${userInput}`
-      );
+      const fetchSearchResults = await fetch('/api/search-movies', {
+        method: 'POST',
+        body: JSON.stringify({
+          userInput,
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
 
-      if (fetchSearchResults.ok) {
-        const searchResults: MoviesApiResponse =
-          await fetchSearchResults.json();
+      const response: ApiResponse = await fetchSearchResults.json();
 
-        return searchResults.results;
+      if (response.message === 'success') {
+        const { data } = response;
+
+        return data.movies.results;
       } else {
-        // todo: error handling
+        throw new HandleError();
       }
     },
     enabled: !!userInput,
@@ -47,13 +72,14 @@ const SearchPage = ({ data }: Props) => {
     setUserInput(value);
   };
 
+  const handleKeyPress = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      router.push(`/search?query=${userInput}`);
+    }
+  };
+
   if (error) {
-    // todo: proper error handling
-    return (
-      <div>
-        <p>Error Loading</p>
-      </div>
-    );
+    throw new HandleError();
   }
 
   return (
@@ -65,11 +91,12 @@ const SearchPage = ({ data }: Props) => {
             className='w-[85%] mx-auto flex items-center justify-center md:w-[60%] lg:w-[50%] xl:w-[40%] 2xl:w-[30%]'
           >
             <input
-              autoFocus
               type='text'
+              ref={inputRef}
               value={userInput}
+              onKeyDown={handleKeyPress}
               onChange={handleUserInput}
-              placeholder='Avengers Endgame'
+              placeholder={userInput || 'Avengers Endgame'}
               className='bg-gray-200 border-gray-300 border-[1.25px] w-full py-3 px-6 rounded-[2rem] outline-none font-normal text-base text-black'
             />
           </form>
