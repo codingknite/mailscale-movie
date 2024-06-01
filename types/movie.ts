@@ -22,3 +22,10 @@ export interface MoviesApiResponse {
   total_pages: number;
   total_results: number;
 }
+
+export interface ApiResponse {
+  message: string;
+  data: {
+    movies: MoviesApiResponse;
+  };
+}
