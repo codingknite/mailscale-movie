@@ -1,23 +1,81 @@
+'use client';
+
+import { useParams } from 'next/navigation';
+import Image from 'next/image';
 import FadeHero from '@/components/FadeHero';
 import MovieCard from '@/components/MovieCard';
-import Button from '@/components/MovieDetails/Button';
 import Cast from '@/components/MovieDetails/Cast';
 import Genre from '@/components/MovieDetails/Genre';
-import Image from 'next/image';
+import LinkButton from '@/components/MovieDetails/Button';
+import { useQuery } from '@tanstack/react-query';
+import { baseApiURL, baseImageURL } from '@/utils/helpers';
+import { MovieProps } from '@/types/movie';
+import { CastProps } from '@/types/cast';
+
+interface GenreProps {
+  id: number;
+  name: string;
+}
 
 const Favorites = () => {
+  const params = useParams();
+  const { id: movieId } = params;
+
+  const apiKey = process.env.NEXT_PUBLIC_TMDB_API_KEY;
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['fetch movie detils', movieId],
+    queryFn: async () => {
+      const fetchMovieData = await fetch(
+        `${baseApiURL}/${movieId}?api_key=${apiKey}&language=en-US&append_to_response=videos`
+      );
+
+      const fetchCast = await fetch(
+        `${baseApiURL}/${movieId}/credits?api_key=${apiKey}&language=en-US`
+      );
+
+      const fetchSimilarMovies = await fetch(
+        `${baseApiURL}/${movieId}/recommendations?api_key=${apiKey}&language=en-US`
+      );
+
+      if (fetchMovieData.ok && fetchCast.ok && fetchSimilarMovies.ok) {
+        const castData = await fetchCast.json();
+        const movieData = await fetchMovieData.json();
+        const similarMovies = await fetchSimilarMovies.json();
+
+        return { movieData, castData, similarMovies: similarMovies.results };
+      }
+    },
+  });
+
+  if (isLoading) {
+    return <p>loading...</p>;
+  }
+
+  if (error) {
+    // todo: handleError
+    console.log('ERROR', error);
+    return (
+      <div>
+        <p>An error occured</p>
+      </div>
+    );
+  }
+
   return (
     <main className='text-white'>
       <div>
         <div className=' bg-pink-200 relative'>
-          <FadeHero imagePath='/search-poster.webp' />
+          <FadeHero
+            imagePath={`${baseImageURL}/${data?.movieData.backdrop_path}`}
+          />
         </div>
 
         <div className='p-6 2xl:w-[1440px] 2xl:mx-auto'>
           <div className='mx-auto flex flex-col items-center md:flex-row md:items-start md:p-6 md:gap-4 lg:gap-2 lg:w-[90%] xl:w-[70%]'>
             <div className='w-[70%] h-[320px] relative hidden md:block md:w-[260px] lg:w-[320px] lg:h-[400px]'>
               <Image
-                src='/poster.jpeg'
+                src={`${baseImageURL}/${data?.movieData.poster_path}`}
                 alt='Movie Name Poster'
                 height={1024}
                 width={1024}
@@ -27,26 +85,28 @@ const Favorites = () => {
 
             <div className='flex flex-col p-6 md:w-[80%] md:py-0'>
               <h1 className='text-4xl font-medium lg:text-5xl lg:w-[90%]'>
-                Kingdom of the Planet of the Apes
+                {data?.movieData.title}
               </h1>
               <h2 className='text-lg font-medium text-gray-200 pb-4 pt-2 lg:text-xl lg:py-4'>
-                No one can stop the reign
+                {data?.movieData.tagline}
               </h2>
 
               <div className='flex gap-4 '>
                 <p className='text-sm text-gray-300 font-medium border-r-[2px] pr-4'>
-                  English
+                  {data?.movieData.spoken_languages[0].name}
                 </p>
                 <p className='text-sm text-gray-300 font-medium border-r-[2px] pr-4'>
-                  145 Mins
+                  {data?.movieData.runtime} Mins
                 </p>
-                <p className='text-sm text-gray-300 font-medium'>May, 2024</p>
+                <p className='text-sm text-gray-300 font-medium'>
+                  {data?.movieData.release_date.split('-')[0]}
+                </p>
               </div>
 
               <div className='flex flex-wrap gap-2 mt-4'>
-                <Genre name='Science Fiction' />
-                <Genre name='Science Fiction' />
-                <Genre name='Science Fiction' />
+                {data?.movieData.genres.slice(0, 3).map((genre: GenreProps) => (
+                  <Genre name={genre.name} key={genre.id} />
+                ))}
               </div>
 
               <div className='mt-6'>
@@ -54,32 +114,33 @@ const Favorites = () => {
                   The Plot
                 </p>
                 <p className='text-sm font-normal'>
-                  Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                  Molestiae ratione, soluta aut accusantium laudantium molestias
-                  quam neque ut debitis excepturi blanditiis itaque voluptate
-                  nulla placeat minima eaque obcaecati, officia commodi incidunt
-                  ad quia dolore aliquid. Saepe fugiat possimus quibusdam!
-                  Ipsam.
+                  {data?.movieData.overview}
                 </p>
               </div>
 
               <div className='flex flex-col flex-wrap items-center justify-between mt-6 gap-5 lg:flex-row'>
-                <Button text='Add to favorites' />
-                <Button text='See on IMDB' />
-                <Button text='Watch trailer' />
+                <LinkButton link='#' text='Add to favorites' />
+                <LinkButton
+                  link={`https://www.imdb.com/title/${data?.movieData.imdb_id}`}
+                  text='See on IMDB'
+                />
+                <LinkButton
+                  link={
+                    data?.movieData.homepage ? data.movieData.homepage : '#'
+                  }
+                  text='Visit Website'
+                />
               </div>
             </div>
           </div>
 
-          <div className='p-6 lg:w-[70%] lg:mx-auto'>
-            <p className='text-lg font-medium text-gray-100'>Top Cast</p>
+          <div className='p-6 lg:w-[80%] lg:mx-auto'>
+            <p className='text-2xl font-medium text-gray-100'>The Cast</p>
 
             <div className='mt-6 flex flex-wrap gap-4'>
-              <Cast name='Chris Hemsworth' imageLink='/poster.jpeg' />
-              <Cast name='Tom Holland Hemsworth' imageLink='/poster.jpeg' />
-              <Cast name='Chris Hemsworth' imageLink='/poster.jpeg' />
-              <Cast name='Chris Hemsworth' imageLink='/poster.jpeg' />
-              <Cast name='Chris Hemsworth' imageLink='/poster.jpeg' />
+              {data?.castData.cast.slice(0, 40).map((cast: CastProps) => (
+                <Cast name={cast.name} imageLink={cast.profile_path} />
+              ))}
             </div>
           </div>
         </div>
@@ -90,14 +151,9 @@ const Favorites = () => {
           </h2>
 
           <div className='flex flex-wrap gap-2 ml-1 lg:gap-4 lg:ml-2 mt-8'>
-            <MovieCard />
-            <MovieCard />
-            <MovieCard />
-            <MovieCard />
-            <MovieCard />
-            <MovieCard />
-            <MovieCard />
-            <MovieCard />
+            {data?.similarMovies.map((movie: MovieProps) => (
+              <MovieCard data={movie} />
+            ))}
           </div>
         </div>
       </div>
