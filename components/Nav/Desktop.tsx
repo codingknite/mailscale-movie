@@ -28,12 +28,6 @@ const DesktopNav = () => {
               Movies
             </Link>
             <Link
-              href='/series'
-              className='hover:text-red-500 hover:font-semibold'
-            >
-              Series
-            </Link>
-            <Link
               href='/search'
               className='hover:text-red-500 hover:font-semibold'
             >

@@ -1,6 +1,6 @@
 'use client';
 
-import { Github, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
@@ -77,7 +77,12 @@ const AuthenticationModal = ({ isOpen, closeModal, signIn }: Props) => {
             </div>
 
             <button className='flex items-center justify-center rounded-custom gap-3 p-3 w-full bg-red-800 active:bg-red-900 hover:bg-red-900 mt-8'>
-              <Github />
+              <Image
+                src='/github.svg'
+                alt='Github Icon'
+                height={30}
+                width={30}
+              />
               <p className='text-base font-semibold md:text-sm'>
                 {signIn ? 'Sign in' : 'Sign up'} with Github
               </p>
