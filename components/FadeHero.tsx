@@ -12,7 +12,7 @@ const FadeHero = ({ children, imagePath }: Props) => {
       style={{
         width: '100%',
         backgroundSize: 'cover',
-        backgroundPosition: 'center',
+        backgroundPosition: 'top',
         backgroundRepeat: 'no-repeat',
         backgroundImage: `linear-gradient(to bottom, rgba(0, 0, 0, 0), #000000), url('${imagePath}')`,
       }}
