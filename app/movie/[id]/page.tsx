@@ -1,31 +1,22 @@
 'use client';
 
+import { CastProps } from '@/types/cast';
+import { MovieProps } from '@/types/movie';
 import { useParams } from 'next/navigation';
+import { useQuery } from '@tanstack/react-query';
+import { ThumbsDown, ThumbsUp } from 'lucide-react';
+import { baseApiURL, baseImageURL } from '@/utils/helpers';
 import Image from 'next/image';
 import FadeHero from '@/components/FadeHero';
 import MovieCard from '@/components/MovieCard';
 import Cast from '@/components/MovieDetails/Cast';
 import Genre from '@/components/MovieDetails/Genre';
+import useFavorites from '@/hooks/useFavorites';
 import LinkButton from '@/components/MovieDetails/Button';
-import { useQuery } from '@tanstack/react-query';
-import { baseApiURL, baseImageURL } from '@/utils/helpers';
-import { MovieProps } from '@/types/movie';
-import { CastProps } from '@/types/cast';
-import { useState } from 'react';
-import { ThumbsDown, ThumbsUp } from 'lucide-react';
 
 interface GenreProps {
   id: number;
   name: string;
-}
-
-let initialFavorites: number[] = [];
-
-try {
-  initialFavorites = JSON.parse(localStorage.getItem('favoriteMovies') || '[]');
-} catch (error) {
-  initialFavorites = [];
-  console.error('Failed to parse favorite movies');
 }
 
 const Favorites = () => {
@@ -33,7 +24,7 @@ const Favorites = () => {
   const { id: movieId } = params;
   const apiKey = process.env.NEXT_PUBLIC_TMDB_API_KEY;
 
-  const [favorites, setFavorites] = useState(initialFavorites);
+  const { favorites, addFavorites } = useFavorites();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['fetch movie detils', movieId],
@@ -59,24 +50,6 @@ const Favorites = () => {
       }
     },
   });
-
-  const addFavoriteMovie = (id: number) => {
-    // todo: check if user is authenticated, if not show login modal
-
-    if (!favorites.includes(id)) {
-      const favsCopy = [...favorites];
-      setFavorites([...favorites, id]);
-      favsCopy.push(id);
-      localStorage.setItem('favoriteMovies', JSON.stringify(favsCopy));
-    } else {
-      console.log('ITEM ALREADY EXISTS');
-      const favsCopy = [...favorites];
-      const index = favorites.indexOf(id);
-      favsCopy.splice(index, 1);
-      setFavorites(favsCopy);
-      localStorage.setItem('favoriteMovies', JSON.stringify(favsCopy));
-    }
-  };
 
   if (isLoading) {
     return <p>loading...</p>;
@@ -151,7 +124,7 @@ const Favorites = () => {
               <div className='flex flex-col flex-wrap items-center justify-between mt-6 gap-5 lg:flex-row'>
                 <button
                   className='bg-red-700 w-full flex items-center justify-center py-3 px-2 gap-2 rounded-smooth text-sm font-medium lg:w-[30%] hover:bg-red-800'
-                  onClick={() => addFavoriteMovie(Number(movieId))}
+                  onClick={() => addFavorites(Number(movieId))}
                 >
                   {favorites.includes(Number(movieId)) ? (
                     <>
