@@ -37,7 +37,7 @@ const Home = async () => {
 
     return (
       <HomePage
-        featuredMovieIndex={Math.floor(Math.random() * 21)}
+        featuredMovieIndex={Math.floor(Math.random() * 20)}
         popular={popularMovies.results}
         upcoming={upcomingMovies.results}
         nowPlaying={nowPlayingMovies.results}

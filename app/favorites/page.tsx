@@ -16,7 +16,7 @@ const Favorites = () => {
   const { favorites } = useFavorites();
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['fetch all favorites'],
+    queryKey: ['fetch all favorites', favorites],
     queryFn: async () => {
       try {
         const promises = favorites.map(async (fav) => {
@@ -38,6 +38,7 @@ const Favorites = () => {
         console.error('Error fetching favorites');
       }
     },
+    refetchOnMount: true,
   });
 
   if (isLoading) {
