@@ -9,17 +9,16 @@ import { signIn } from 'next-auth/react';
 
 interface Props {
   isOpen: boolean;
-  login?: boolean;
   closeModal: () => void;
 }
 
-const AuthenticationModal = ({ isOpen, closeModal, login }: Props) => {
+const AuthenticationModal = ({ isOpen, closeModal }: Props) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
-  });
+  }, []);
 
   // close modal when user clicks outside container
   useEffect(() => {
@@ -39,7 +38,7 @@ const AuthenticationModal = ({ isOpen, closeModal, login }: Props) => {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [isOpen]);
+  }, [isOpen, closeModal]);
 
   const handleSignin = () => {
     signIn('github');

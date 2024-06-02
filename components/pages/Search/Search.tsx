@@ -26,6 +26,7 @@ const SearchPage = ({ data }: Props) => {
   const params = useSearchParams();
   const queryParam = params.get('query');
 
+  const [initialData] = useState(data || []);
   const [userInput, setUserInput] = useState(queryParam || '');
 
   useEffect(() => {
@@ -116,7 +117,7 @@ const SearchPage = ({ data }: Props) => {
             ) : (
               <>
                 {!searchResults
-                  ? data.map((movie, index) => (
+                  ? initialData.map((movie, index) => (
                       <MovieCard data={movie} key={index} />
                     ))
                   : searchResults.map((movie, index) => (
