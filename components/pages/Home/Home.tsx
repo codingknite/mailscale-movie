@@ -1,10 +1,10 @@
 'use client';
 
+import Link from 'next/link';
 import FadeHero from '@/components/FadeHero';
 import MovieCard from '@/components/MovieCard';
 import { MovieProps } from '@/types/movie';
 import { baseImageURL } from '@/utils/helpers';
-import Link from 'next/link';
 
 interface Props {
   popular: MovieProps[];
@@ -46,8 +46,8 @@ const HomePage = ({
           </h2>
 
           <div className='flex flex-wrap gap-2 ml-1 lg:gap-4 lg:ml-2 mt-8'>
-            {popular.map((movie) => (
-              <MovieCard data={movie} />
+            {popular.map((movie, index) => (
+              <MovieCard data={movie} key={index} />
             ))}
           </div>
         </div>
@@ -58,8 +58,8 @@ const HomePage = ({
           </h2>
 
           <div className='flex flex-wrap gap-2 ml-1 lg:gap-4 lg:ml-2 mt-8'>
-            {nowPlaying.map((movie) => (
-              <MovieCard data={movie} />
+            {nowPlaying.map((movie, index) => (
+              <MovieCard data={movie} key={index} />
             ))}
           </div>
         </div>
@@ -70,8 +70,8 @@ const HomePage = ({
           </h2>
 
           <div className='flex flex-wrap gap-2 ml-1 lg:gap-4 lg:ml-2 mt-8'>
-            {upcoming.map((movie) => (
-              <MovieCard data={movie} />
+            {upcoming.map((movie, index) => (
+              <MovieCard data={movie} key={index} />
             ))}
           </div>
         </div>

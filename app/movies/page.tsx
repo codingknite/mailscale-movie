@@ -9,6 +9,7 @@ import { useSearchParams } from 'next/navigation';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import MovieCard from '@/components/MovieCard';
+import Loading from '@/components/Loading';
 
 interface GenreProps {
   id: number;
@@ -70,6 +71,7 @@ const SearchResults = () => {
         <div className='flex gap-4 px-4 overflow-y-scroll scrollbar-none py-2.5'>
           {genres.map((genre) => (
             <button
+              key={genre.id}
               className={`text-black py-3 px-6 rounded-smooth text-sm font-medium min-w-[160px] ${
                 selectedGenre.name === genre.name
                   ? 'bg-red-600 text-white'
@@ -93,13 +95,11 @@ const SearchResults = () => {
         </h2>
 
         {isLoading ? (
-          <div>
-            <p>Loading...</p>
-          </div>
+          <Loading />
         ) : (
           <div className='flex flex-wrap gap-2 ml-1 lg:gap-4 lg:ml-2 mt-8'>
-            {data?.results.map((movie) => (
-              <MovieCard data={movie} />
+            {data?.results.map((movie, index) => (
+              <MovieCard data={movie} key={index} />
             ))}
           </div>
         )}

@@ -14,6 +14,7 @@ import {
   useState,
 } from 'react';
 import { HandleError } from '@/lib/exception';
+import Loading from '@/components/Loading';
 
 interface Props {
   data: MovieProps[];
@@ -31,7 +32,7 @@ const SearchPage = ({ data }: Props) => {
     if (inputRef.current && !userInput) {
       inputRef.current.focus();
     }
-  }, []);
+  }, [userInput]);
 
   const {
     data: searchResults,
@@ -109,14 +110,18 @@ const SearchPage = ({ data }: Props) => {
 
           <div className='flex flex-wrap gap-2 ml-1 lg:gap-4 lg:ml-2 mt-4'>
             {isLoading ? (
-              <p>Loading...</p>
+              <Loading />
             ) : error ? (
               <p>An Error Occurred</p>
             ) : (
               <>
                 {!searchResults
-                  ? data.map((movie) => <MovieCard data={movie} />)
-                  : searchResults.map((movie) => <MovieCard data={movie} />)}
+                  ? data.map((movie, index) => (
+                      <MovieCard data={movie} key={index} />
+                    ))
+                  : searchResults.map((movie, index) => (
+                      <MovieCard data={movie} key={index} />
+                    ))}
               </>
             )}
           </div>

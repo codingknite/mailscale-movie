@@ -1,3 +1,5 @@
+'use client';
+
 import { useState } from 'react';
 
 const useFavorites = () => {
@@ -14,8 +16,6 @@ const useFavorites = () => {
   const [favorites, setFavorites] = useState(initialFavorites);
 
   const addFavorites = (id: number) => {
-    // todo: check if user is authenticated, if not show login modal
-
     if (!favorites.includes(id)) {
       const favsCopy = [...favorites];
       setFavorites([...favorites, id]);
